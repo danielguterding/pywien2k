@@ -93,9 +93,10 @@ def main():
   an = 1 #number of the interesting atom in qtl file
   interestingbands = [i for i in range(5,18)]
   
-  qtlfilename = 'NiO.qtl'
-  spaghettifilename = 'NiO.spaghetti_ene'
-  bandsfilename = 'NiO.bands'
+  casename = 'NiO'
+  qtlfilename = '%s.qtl' % casename
+  spaghettifilename = '%s.spaghetti_ene' % casename
+  bandsfilename = '%s.bands' % casename
   orbitalmatching = {'tot': 2, 'stot': 3, 'ptot': 4, 'px': 5, 'py': 6, 'pz': 7, 'dtot': 8, 'dz2': 9, 'dx2y2': 10, 'dxy': 11, 'dxz': 12, 'dyz': 13, 'ftot': 14} #orbital-index matching for ISPLIT=8 
   
   bands = getbanddata(spaghettifilename, interestingbands=interestingbands)
