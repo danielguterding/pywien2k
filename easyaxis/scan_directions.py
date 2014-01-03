@@ -106,7 +106,7 @@ def main():
     if(None == firstenergy): #save energy of first point so that output can be written relative to that one
       firstenergy = energy
     outfilehandle = open(outfilename, 'a')
-    outfilehandle.write('%f %f %f %f %f\n' % (d.deg, d.x, d.y, d.z, (energy-firstenergy)*13600, magneticmoment))
+    outfilehandle.write('%f %f %f %f %f %f\n' % (d.deg, d.x, d.y, d.z, (energy-firstenergy)*13600, magneticmoment))
     outfilehandle.close()
     remove_broyden_files()
     
