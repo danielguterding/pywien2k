@@ -71,7 +71,17 @@ def get_converged_energy(materialname):
   stdout, stderr = p.communicate()
   energy = float(stdout.split()[-1].strip())
   return energy
- 
+  
+def get_converged_magnetic_moment(materialname, momentindex):
+  scffilename = materialname + '.scf'
+  print scffilename
+  command = 'grep :MMI%03i %s | tail -n 1' % (momentindex, scffilename) #get the value for the magnetic moment in the scf file
+  p = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE) 
+  p.wait()
+  stdout, stderr = p.communicate()
+  moment = float(stdout.split()[-1].strip())
+  return moment
+  
 def main():
   angfilename = sys.argv[1]
   materialname = os.getcwd().split('/')[-1] #get the name of the working folder without the path
@@ -79,19 +89,21 @@ def main():
   
   outfilename = os.path.splitext(angfilename)[0] + '_res.dat'
   outfilehandle = open(outfilename, 'w')
-  outfilehandle.write('#deg, xdir, ydir, zdir, energy in meV\n')
+  outfilehandle.write('#deg, xdir, ydir, zdir, energy in meV, magnetic moment 001 in mu bohr\n')
+  outfilehandle.close()
   
   firstenergy = None
 
   for d in directions:
-    generate_insofile(materialname,d.x, d.y, d.z)
-    generate_machines_file('ektorp')
+    generate_insofile(materialname, d.x, d.y, d.z)
+    generate_machines_file('fullen')
     run_wien2k_convergence()
     energy = get_converged_energy(materialname)
+    magneticmoment = get_converged_magnetic_moment(materialname, 1)
     if(None == firstenergy): #save energy of first point so that output can be written relative to that one
       firstenergy = energy
-    outfilehandle.write('%f %f %f %f %f\n' % (d.deg, d.x, d.y, d.z, (energy-firstenergy)*13600))
+    outfilehandle = open(outfilename, 'a')
+    outfilehandle.write('%f %f %f %f %f\n' % (d.deg, d.x, d.y, d.z, (energy-firstenergy)*13600, magneticmoment))
+    outfilehandle.close()
     
-  outfilehandle.close()
-  
 main()
