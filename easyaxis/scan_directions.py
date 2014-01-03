@@ -92,10 +92,8 @@ def main():
   
   outfilename = os.path.splitext(angfilename)[0] + '_res.dat'
   outfilehandle = open(outfilename, 'w')
-  outfilehandle.write('#deg, xdir, ydir, zdir, energy in meV, magnetic moment 001 in mu bohr\n')
+  outfilehandle.write('#deg, xdir, ydir, zdir, energy in ryd, magnetic moment 001 in mu bohr\n')
   outfilehandle.close()
-  
-  firstenergy = None
 
   for d in directions:
     generate_insofile(materialname, d.x, d.y, d.z)
@@ -103,10 +101,8 @@ def main():
     run_wien2k_convergence()
     energy = get_converged_energy(materialname)
     magneticmoment = get_converged_magnetic_moment(materialname, 1)
-    if(None == firstenergy): #save energy of first point so that output can be written relative to that one
-      firstenergy = energy
     outfilehandle = open(outfilename, 'a')
-    outfilehandle.write('%f %f %f %f %f %f\n' % (d.deg, d.x, d.y, d.z, (energy-firstenergy)*13600, magneticmoment))
+    outfilehandle.write('%f %f %f %f %f %f\n' % (d.deg, d.x, d.y, d.z, energy, magneticmoment))
     outfilehandle.close()
     remove_broyden_files()
     
