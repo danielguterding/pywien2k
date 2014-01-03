@@ -64,7 +64,6 @@ def run_wien2k_convergence():
   
 def get_converged_energy(materialname):
   scffilename = materialname + '.scf'
-  print scffilename
   command = 'grep :ENE %s | tail -n 1' % (scffilename) #get the last energy value in the scf file
   p = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE) 
   p.wait()
@@ -74,13 +73,17 @@ def get_converged_energy(materialname):
   
 def get_converged_magnetic_moment(materialname, momentindex):
   scffilename = materialname + '.scf'
-  print scffilename
   command = 'grep :MMI%03i %s | tail -n 1' % (momentindex, scffilename) #get the value for the magnetic moment in the scf file
   p = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE) 
   p.wait()
   stdout, stderr = p.communicate()
   moment = float(stdout.split()[-1].strip())
   return moment
+  
+def remove_broyden_files():
+  command = 'rm *broyd*'
+  p = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE) 
+  p.wait()
   
 def main():
   angfilename = sys.argv[1]
@@ -105,5 +108,6 @@ def main():
     outfilehandle = open(outfilename, 'a')
     outfilehandle.write('%f %f %f %f %f\n' % (d.deg, d.x, d.y, d.z, (energy-firstenergy)*13600, magneticmoment))
     outfilehandle.close()
+    remove_broyden_files()
     
 main()
