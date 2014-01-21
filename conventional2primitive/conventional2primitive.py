@@ -104,12 +104,22 @@ def main():
   
   if(1<len(sys.argv)):
     filename = str(sys.argv[1])
+    mode = str(sys.argv[2])
+    x = float(sys.argv[3])
+    y = float(sys.argv[4])
+    z = float(sys.argv[5])
   
     converter = Wien2kConventionalToPrimitive(filename)
-    print converter.direct_conventional_to_primitive([1,0,0])
-    print converter.direct_primitive_to_conventional([-0.5,0.5,0.5])
-    print converter.reciprocal_conventional_to_primitive([0,0,1])
-    print converter.reciprocal_primitive_to_conventional([1,1,0])
+    if('dc2p' == mode):
+      print converter.direct_conventional_to_primitive([x,y,z])
+    elif('dp2c' == mode):
+      print converter.direct_primitive_to_conventional([x,y,z])
+    elif('rc2p' == mode):
+      print converter.reciprocal_conventional_to_primitive([x,y,z])
+    elif('rp2c' == mode):
+      print converter.reciprocal_primitive_to_conventional([x,y,z])
+    else:
+      print 'Warning! Mode not recognized.'
   else:
     print "No input file supplied! Please pass the path to case.outputd as command line argument."
   
