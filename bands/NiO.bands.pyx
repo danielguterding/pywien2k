@@ -1,3 +1,5 @@
+bandfile = "NiO.bands"
+
 set terminal pdf
 set output 'NiO.bands.pdf'
 
@@ -28,12 +30,12 @@ set palette corb1, corb2, corb3, corb4, corb5
 a=0.6
 
 plot 0 with lines lt 2 color grey notitle, \
-     "NiO.bands" using 2:3 with lines color black lw 0.2 notitle, \
-     "NiO.bands" using 2:3 with points color 1 ps $5*a pt 17 notitle, \
-     "NiO.bands" using 2:3 with points color 2 ps $6*a pt 17 notitle, \
-     "NiO.bands" using 2:3 with points color 3 ps $7*a pt 17 notitle, \
-     "NiO.bands" using 2:3 with points color 4 ps $8*a pt 17 notitle, \
-     "NiO.bands" using 2:3 with points color 5 ps $9*a pt 17 notitle, \
+     bandfile using 2:3 with lines color black lw 0.2 notitle, \
+     bandfile using 2:3 with points color 1 ps $5*a pt 17 notitle, \
+     bandfile using 2:3 with points color 2 ps $6*a pt 17 notitle, \
+     bandfile using 2:3 with points color 3 ps $7*a pt 17 notitle, \
+     bandfile using 2:3 with points color 4 ps $8*a pt 17 notitle, \
+     bandfile using 2:3 with points color 5 ps $9*a pt 17 notitle, \
      -100 with points color 1 pt 17 title "Ni 3$d_{z^2}$", \
      -100 with points color 2 pt 17 title "Ni 3$d_{x^2 - y^2}$", \
      -100 with points color 3 pt 17 title "Ni 3$d_{xy}$", \
