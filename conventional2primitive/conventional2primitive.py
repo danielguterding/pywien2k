@@ -1,3 +1,4 @@
+#Copyright (c) 2014, Daniel Guterding <guterding@itp.uni-frankfurt.de>
 import os
 import sys
 import numpy as np
@@ -110,6 +111,6 @@ def main():
     print converter.reciprocal_conventional_to_primitive([0,0,1])
     print converter.reciprocal_primitive_to_conventional([1,1,0])
   else:
-    print "No input file supplied! Aborting. Please pass the path to case.outputd as command line argument."
+    print "No input file supplied! Please pass the path to case.outputd as command line argument."
   
 main()
