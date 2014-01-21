@@ -14,10 +14,6 @@ class Wien2kConventionalToPrimitive:
     self.lattice_reciprocal_primitive = np.zeros((3,3), dtype=float)
     
     i = 0
-    while(-1 == lines[i].find('LATTICE CONSTANTS ARE')):
-      i+=1
-    a, b, c = lines[i].split()[-3:]
-    
     while(-1 == lines[i].find('BR1_REC')):
       i+=1
     i+=1
@@ -65,42 +61,43 @@ class Wien2kConventionalToPrimitive:
     l7, l8, l9 = lines[i].split()
     i+=1
     self.lattice_direct_primitive = np.array(((l1,l2,l3),(l4,l5,l6),(l7,l8,l9)), dtype=float)
+	
+    self.transform_direct = self.lattice_direct_primitive.dot(np.linalg.inv(self.lattice_direct_conventional))
+    self.transform_direct_inverse = self.lattice_direct_conventional.dot(np.linalg.inv(self.lattice_direct_primitive))
     
-    
-    #divide all matrices by lattice constants in order to go to reduced coordinates in the respective cell
-    v = np.zeros(3, dtype=float)
-    v = np.array((a,b,c), dtype=float)
-    for i in range(3):
-      for j in range(3):
-	self.lattice_reciprocal_conventional[i][j] *= v[j]/2.0/np.pi
-	self.lattice_reciprocal_primitive[i][j] *= v[j]/2.0/np.pi
-	self.lattice_direct_conventional[i][j] /= v[j]
-	self.lattice_direct_primitive[i][j] /= v[j]
+    self.transform_reciprocal = self.lattice_reciprocal_primitive.dot(np.linalg.inv(self.lattice_reciprocal_conventional))
+    self.transform_reciprocal_inverse = self.lattice_reciprocal_conventional.dot(np.linalg.inv(self.lattice_reciprocal_primitive))
     
     #print self.lattice_reciprocal_conventional
     #print self.lattice_reciprocal_primitive
-    
     #print self.lattice_direct_conventional
     #print self.lattice_direct_primitive
     
-    #print self.lattice_reciprocal_conventional * np.linalg.inv(self.lattice_reciprocal_primitive).transpose()
-    #print self.lattice_direct_conventional * np.linalg.inv(self.lattice_direct_primitive).transpose()
+    #print np.linalg.inv(self.lattice_reciprocal_conventional)
+    #print np.linalg.inv(self.lattice_reciprocal_primitive)
+    #print np.linalg.inv(self.lattice_direct_conventional)
+    #print np.linalg.inv(self.lattice_direct_primitive)
+    
+    #print self.transform_direct
+    #print self.transform_direct_inverse
+    #print self.transform_reciprocal
+    #print self.transform_reciprocal_inverse
 
   def direct_primitive_to_conventional(self, vec):
     vec = np.array(vec, dtype=float)
-    return np.linalg.inv(self.lattice_direct_primitive).dot(vec)
+    return self.transform_direct_inverse.dot(vec)
     
   def direct_conventional_to_primitive(self, vec):
     vec = np.array(vec, dtype=float)
-    return self.lattice_direct_primitive.dot(vec)
+    return self.transform_direct.dot(vec)
     
   def reciprocal_primitive_to_conventional(self, vec):
     vec = np.array(vec, dtype=float)
-    return np.linalg.inv(self.lattice_reciprocal_primitive).dot(vec)
+    return self.transform_reciprocal_inverse.dot(vec)
     
   def reciprocal_conventional_to_primitive(self, vec):
     vec = np.array(vec, dtype=float)
-    return self.lattice_reciprocal_primitive.dot(vec)
+    return self.transform_reciprocal.dot(vec)
     
 def main():
   
@@ -109,10 +106,10 @@ def main():
   
     converter = Wien2kConventionalToPrimitive(filename)
     print converter.direct_conventional_to_primitive([1,0,0])
-    print converter.direct_primitive_to_conventional([0,0,1])
+    print converter.direct_primitive_to_conventional([-0.5,0.5,0.5])
     print converter.reciprocal_conventional_to_primitive([0,0,1])
-    print converter.reciprocal_primitive_to_conventional([0,0,2])
+    print converter.reciprocal_primitive_to_conventional([1,1,0])
   else:
-    print "No input file supplied! Aborting. Please pass the path to case.outputd."
+    print "No input file supplied! Aborting. Please pass the path to case.outputd as command line argument."
   
 main()
