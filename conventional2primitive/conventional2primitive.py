@@ -63,14 +63,16 @@ class Wien2kConventionalToPrimitive:
     i+=1
     self.lattice_direct_primitive = np.array(((l1,l2,l3),(l4,l5,l6),(l7,l8,l9)), dtype=float)
 	
-    self.transform_direct = self.lattice_direct_primitive.dot(np.linalg.inv(self.lattice_direct_conventional))
-    self.transform_direct_inverse = self.lattice_direct_conventional.dot(np.linalg.inv(self.lattice_direct_primitive))
+    self.transform_direct = np.linalg.inv(self.lattice_direct_primitive).dot(self.lattice_direct_conventional)
+    self.transform_direct_inverse = np.linalg.inv(self.transform_direct)
     
-    self.transform_reciprocal = self.lattice_reciprocal_primitive.dot(np.linalg.inv(self.lattice_reciprocal_conventional))
-    self.transform_reciprocal_inverse = self.lattice_reciprocal_conventional.dot(np.linalg.inv(self.lattice_reciprocal_primitive))
+    self.transform_reciprocal = np.linalg.inv(self.lattice_reciprocal_primitive).dot(self.lattice_reciprocal_conventional)
+    self.transform_reciprocal_inverse = np.linalg.inv(self.transform_reciprocal)
     
-    #print self.lattice_reciprocal_conventional
-    #print self.lattice_reciprocal_primitive
+    #print 'reciprocal conventional cell:\n', self.lattice_reciprocal_conventional
+    #print 'reciprocal primitive cell:\n', self.lattice_reciprocal_primitive
+    #print 'reciprocal conventional cell volume: ', np.linalg.det(self.lattice_reciprocal_conventional)
+    #print 'reciprocal primitive cell volume: ', np.linalg.det(self.lattice_reciprocal_primitive)
     #print self.lattice_direct_conventional
     #print self.lattice_direct_primitive
     
@@ -80,9 +82,9 @@ class Wien2kConventionalToPrimitive:
     #print np.linalg.inv(self.lattice_direct_primitive)
     
     #print self.transform_direct
-    #print self.transform_direct_inverse
+    #print np.linalg.inv(self.transform_direct_inverse)
     #print self.transform_reciprocal
-    #print self.transform_reciprocal_inverse
+    #print np.linalg.inv(self.transform_reciprocal_inverse)
 
   def direct_primitive_to_conventional(self, vec):
     vec = np.array(vec, dtype=float)
@@ -98,6 +100,10 @@ class Wien2kConventionalToPrimitive:
     
   def reciprocal_conventional_to_primitive(self, vec):
     vec = np.array(vec, dtype=float)
+    #print "conventional reduced vector: ",  vec
+    #print "cartesian vector: ", self.lattice_reciprocal_conventional.dot(vec)
+    #print "primitive reduced vector: ", self.transform_reciprocal.dot(vec)
+    #print "cartesian vector: ", self.lattice_reciprocal_primitive.dot(self.transform_reciprocal.dot(vec))
     return self.transform_reciprocal.dot(vec)
     
 def main():
