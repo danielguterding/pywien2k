@@ -63,12 +63,15 @@ class Wien2kConventionalToPrimitive:
     i+=1
     self.lattice_direct_primitive = np.array(((l1,l2,l3),(l4,l5,l6),(l7,l8,l9)), dtype=float)
 	
-    self.transform_direct = np.linalg.inv(self.lattice_direct_primitive).dot(self.lattice_direct_conventional)
+    self.transform_direct = np.linalg.inv(self.lattice_direct_primitive.transpose()).dot(self.lattice_direct_conventional.transpose())
     self.transform_direct_inverse = np.linalg.inv(self.transform_direct)
     
-    self.transform_reciprocal = np.linalg.inv(self.lattice_reciprocal_primitive).dot(self.lattice_reciprocal_conventional)
+    self.transform_reciprocal = np.linalg.inv(self.lattice_reciprocal_primitive.transpose()).dot(self.lattice_reciprocal_conventional.transpose())
     self.transform_reciprocal_inverse = np.linalg.inv(self.transform_reciprocal)
     
+
+    #print self.lattice_reciprocal_conventional.transpose().dot(self.lattice_direct_conventional)
+    #print self.lattice_reciprocal_primitive.transpose().dot(self.lattice_direct_primitive)
     #print 'reciprocal conventional cell:\n', self.lattice_reciprocal_conventional
     #print 'reciprocal primitive cell:\n', self.lattice_reciprocal_primitive
     #print 'reciprocal conventional cell volume: ', np.linalg.det(self.lattice_reciprocal_conventional)
