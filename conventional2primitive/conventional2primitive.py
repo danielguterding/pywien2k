@@ -3,6 +3,7 @@ import os
 import sys
 import numpy as np
 
+class Wien2kConventionalToPrimitive:
   def __init__(self, filename):
     print 'Do not use this class if your system is orthogonal. Wien2k only interprets the k-vectors in the primitive cell if the lattice is orthogonal.'
     filehandle = open(filename, 'r')
