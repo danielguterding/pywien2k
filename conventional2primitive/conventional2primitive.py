@@ -4,7 +4,7 @@ import sys
 import numpy as np
 
   def __init__(self, filename):
-    print 'Do not use this class if your system is orthogonal. Wien2k only inteprets the k-vectors in the primitive cell if the lattice is orthogonal.'
+    print 'Do not use this class if your system is orthogonal. Wien2k only interprets the k-vectors in the primitive cell if the lattice is orthogonal.'
     filehandle = open(filename, 'r')
     lines = filehandle.readlines()
     filehandle.close()
