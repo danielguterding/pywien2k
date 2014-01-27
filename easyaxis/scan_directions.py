@@ -80,6 +80,27 @@ def get_converged_magnetic_moment(materialname, momentindex):
   moment = float(stdout.split()[-1].strip())
   return moment
   
+def get_bandgap(materialname, loweridx, upperidx): #calculates the band gap bewtween bands with indices loweridx, upperidx in meV
+  scffilename = materialname + '.scf'
+  
+  command = 'grep :BAN%05i %s | tail -n 1' % (loweridx, scffilename) #get the maximum energy of the lower band
+  p = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE) 
+  p.wait()
+  stdout, stderr = p.communicate()
+  lowerbandmaxenergy = = float(stdout.split()[3].strip())
+  
+  command = 'grep :BAN%05i %s | tail -n 1' % (loweridx, scffilename) #get the minimum energy of the upper band
+  p = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE) 
+  p.wait()
+  stdout, stderr = p.communicate()
+  upperbandminenergy = = float(stdout.split()[2].strip())
+  
+  gap = 0.0
+  if (lowerbandmaxenergy < upperbandminenergy):
+    gap = (upperbandminenergy - lowerbandmaxenergy)*13600.0
+    
+  return gap
+  
 def remove_broyden_files():
   command = 'rm *broyd*'
   p = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE) 
@@ -101,8 +122,9 @@ def main():
     run_wien2k_convergence()
     energy = get_converged_energy(materialname)
     magneticmoment = get_converged_magnetic_moment(materialname, 1)
+    bandgap = get_bandgap(materialname, 130, 131)
     outfilehandle = open(outfilename, 'a')
-    outfilehandle.write('%f %f %f %f %f %f\n' % (d.deg, d.x, d.y, d.z, energy, magneticmoment))
+    outfilehandle.write('%f %f %f %f %f %f %f\n' % (d.deg, d.x, d.y, d.z, energy, magneticmoment, bandgap))
     outfilehandle.close()
     remove_broyden_files()
     
