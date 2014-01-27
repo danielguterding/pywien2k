@@ -103,7 +103,7 @@ def get_bandgap(materialname, loweridx, upperidx): #calculates the band gap bewt
   
 def remove_broyden_files():
   command = 'rm *broyd*'
-  p = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE) 
+  p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) 
   p.wait()
   
 def main():
