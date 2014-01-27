@@ -87,7 +87,7 @@ def get_bandgap(materialname, loweridx, upperidx): #calculates the band gap bewt
   p = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE) 
   p.wait()
   stdout, stderr = p.communicate()
-  lowerbandmaxenergy = = float(stdout.split()[3].strip())
+  lowerbandmaxenergy = float(stdout.split()[3].strip())
   
   command = 'grep :BAN%05i %s | tail -n 1' % (loweridx, scffilename) #get the minimum energy of the upper band
   p = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE) 
