@@ -93,7 +93,7 @@ def get_bandgap(materialname, loweridx, upperidx): #calculates the band gap bewt
   p = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE) 
   p.wait()
   stdout, stderr = p.communicate()
-  upperbandminenergy = = float(stdout.split()[2].strip())
+  upperbandminenergy = float(stdout.split()[2].strip())
   
   gap = 0.0
   if (lowerbandmaxenergy < upperbandminenergy):
