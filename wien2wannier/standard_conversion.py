@@ -24,7 +24,7 @@ def get_input_elements(infilename, elementcutoff):
   infilehandle_elements = open(infilename, 'r')
   for line in infilehandle_elements:
     splitline = line.strip().split()
-    if(len(splitline) == 7):
+    if(len(splitline) == 7 and not "1" == splitline[-1]):
       x, y, z, o1, o2, t, dt = splitline[0:7]
       entry = HoppingElement(x, y, z, o1, o2, t)
       if(entry.abst > elementcutoff):
@@ -148,6 +148,8 @@ def main():
     
     #write output file
     write_output_file(outfilename, converted_elements)
+    
+    print 'Model successfully converted. %i hopping elements remaining.' % len(converted_elements)
 
   else:
     print 'Wrong number of input arguments. Please supply Wannier90 case_hr.dat, WIEN2k case.outputd, an ouptut file name and the numerical magnitude cutoff for the hopping elements.'
