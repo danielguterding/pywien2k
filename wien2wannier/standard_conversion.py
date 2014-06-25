@@ -145,6 +145,8 @@ def main():
     #sort entries by magnitude
     converted_elements.sort(key=operator.attrgetter('abst'))
     converted_elements.reverse()
+    converted_elements.sort(key=operator.attrgetter('o2'))
+    converted_elements.sort(key=operator.attrgetter('o1'))
     
     #write output file
     write_output_file(outfilename, converted_elements)
