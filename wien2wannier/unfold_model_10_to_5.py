@@ -46,23 +46,15 @@ def group_elements_by_vector(input_elements):
   #loop over elements and group them
   threshold = 1e-3
   grouped_elements = []
+  firstungroupedidx = 0
   while(element_grouped.sum() < Nelements):
     newgroup = []
-    #find first ungrouped element
-    firstungroupedidx = 0
-    for i in range(Nelements):
-      if(0 == element_grouped[i]):
-	newgroup.append(input_elements[i])
-	element_grouped[i] = 1
-	firstungroupedidx = i
-	break
+    #add first ungrouped element
+    newgroup.append(input_elements[firstungroupedidx])
+    element_grouped[firstungroupedidx] = 1
     
     #add elements to group by comparing hooping vectors
     for i in range(firstungroupedidx+1,Nelements):
-      #check whether all elements of t_ij were found
-      if(100 == len(newgroup)):
-	break
-	
       #check whether element is in group if it is currently ungrouped
       if(0 == element_grouped[i]):
 	#check whether ungrouped element has the same hopping vector as first element in group
@@ -71,6 +63,7 @@ def group_elements_by_vector(input_elements):
 	  element_grouped[i] = 1
 	#assume that elements are ordered according to vectors so that we can stop searching once the first vector that does not match has been found
 	else:
+	  firstungroupedidx = i
 	  break
     #append new group to list of groups
     grouped_elements.append(newgroup)
@@ -82,9 +75,9 @@ def get_unfolded_elements(grouped_elements):
   #build space group unfolding matrix according to Milan Tomic
   unfoldmatrix = np.identity(10)
   unfoldmatrix[0:5,5:10] = np.identity(5)
-  unfoldmatrix[3,8] = -1.0 #assumes xz,yz orbitals with indices 1,2,6,7
-  unfoldmatrix[4,9] = -1.0
-  unfoldmatrix[5:10,0:5] = -unfoldmatrix[0:5,5:10]
+  unfoldmatrix[0,5] = -1.0 #assumes xz,yz orbitals with indices 0,1,5,6
+  unfoldmatrix[1,6] = -1.0
+  unfoldmatrix[5:10,0:5] = -unfoldmatrix[0:5,5:10].T
   #print unfoldmatrix
   
   #build t_ij matrix in each group and unfold it
@@ -96,11 +89,17 @@ def get_unfolded_elements(grouped_elements):
       tmat[e.o1,e.o2] = e.t
     #print tmat[0:5,0:5]
     #print tmat[5:10,5:10]
-    #print tmat
+    #print 
+    #if(np.linalg.norm(group[0].v) < 1e-7):
+      #print tmat
     tmat = unfoldmatrix.dot(tmat.dot(unfoldmatrix.T))
-    #print tmat[0:5,0:5]
-    #print tmat[5:10,5:10]
-    #print tmat
+    #if(np.linalg.norm(group[0].v) < 1e-7):
+      #print
+      #print tmat[0:5,0:5]
+      #print tmat[5:10,5:10]
+      #print
+      #print tmat
+      #print
     
     #take upper left block and save elements larger than threshold
     for o1 in range(5):
