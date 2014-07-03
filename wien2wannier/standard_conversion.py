@@ -8,8 +8,8 @@ class HoppingElement:
     self.x = int(x)
     self.y = int(y)
     self.z = int(z)
-    self.o1 = int(o1)-1
-    self.o2 = int(o2)-1
+    self.o1 = int(o1)
+    self.o2 = int(o2)
     self.t = float(t)
     self.abst = abs(self.t)
     self.v = np.array([self.x, self.y, self.z], dtype=float)
@@ -26,6 +26,8 @@ def get_input_elements(infilename, elementcutoff):
     splitline = line.strip().split()
     if(len(splitline) == 7 and not "1" == splitline[-1]):
       x, y, z, o1, o2, t, dt = splitline[0:7]
+      o1 = int(o1)-1
+      o2 = int(o2)-1
       entry = HoppingElement(x, y, z, o1, o2, t)
       if(entry.abst > elementcutoff):
 	input_elements.append(entry)
