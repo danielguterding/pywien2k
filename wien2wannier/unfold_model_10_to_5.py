@@ -21,8 +21,8 @@ class HoppingElement:
   
 def get_unfolded_elements(input_elements):
   unfolded_elements = []
-  hrot = np.array([[1, 1, 0], [-1, 1, 0], [0, 0, 1]], np.float)
-  signs = [1, -1, 1, -1, 1]
+  hrot = np.array([[1, 1, 0], [-1, 1, 0], [0, 0, 1]], dtype=float)
+  signs = np.array([1, -1, 1, -1, 1], dtype=float)
   # dxy dyz dx2y2 dxz dz2
   sites = np.array([[0.75, 0.25, 0.0], [0.25, 0.75, 0.0]], dtype=float)
   nbands = len(signs)
