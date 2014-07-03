@@ -5,111 +5,106 @@ import numpy as np
 
 class HoppingElement:
   def __init__(self, x, y, z, o1, o2, t):
-    self.x = float(x)
-    self.y = float(y)
-    self.z = float(z)
+    self.x = int(x)
+    self.y = int(y)
+    self.z = int(z)
     self.o1 = int(o1)
     self.o2 = int(o2)
     self.t = float(t)
     self.abst = abs(self.t)
     self.v = np.array([self.x, self.y, self.z], dtype=float)
+  def set_vector(self, v):
+    self.v = v
+    self.x = self.v[0]
+    self.y = self.v[1]
+    self.z = self.v[2]
+  
+def get_unfolded_elements(input_elements):
+  unfolded_elements = []
+  hrot = np.array([[1, 1, 0], [-1, 1, 0], [0, 0, 1]], np.float)
+  signs = [1, -1, 1, -1, 1]
+  # dxy dyz dx2y2 dxz dz2
+  sites = np.array([[0.75, 0.25, 0.0], [0.25, 0.75, 0.0]], dtype=float)
+  nbands = len(signs)
+  orbstosites = np.array([0]*nbands + [1]*nbands, dtype=int)
+  
+  for e in input_elements:
+    si = e.o1/nbands
+    sj = e.o2/nbands
+    bi = e.o1%nbands
+    bj = e.o2%nbands
     
-def get_input_elements(infilename):
+    sign = 0
+    if si == 0 and sj == 0:
+        sign = 1
+    elif si == 1 and sj == 1:
+        sign = signs[bi]*signs[bj]
+    elif si == 0 and sj == 1:
+        sign = signs[bj]
+    elif si == 1 and sj == 0:
+        sign = signs[bi]
+    else:
+      print 'Error in unfolding sign determination.'
+        
+    tvec = hrot.dot(e.v + sites[orbstosites[e.o2]] - sites[orbstosites[e.o1]])
+    x = tvec[0]
+    y = tvec[1]
+    z = tvec[2]
+    thop = 0.5*e.t*sign
+    
+    enew = HoppingElement(x, y, z, bi, bj, thop)
+    unfolded_elements.append(enew)
+  
+  return unfolded_elements
+    
+def get_input_elements(infilename, elementcutoff):
   input_elements = []
-  infilehandle = open(infilename, 'r')
-  lines = infilehandle.readlines()
-  infilehandle.close()
+  infilehandle_elements = open(infilename, 'r')
+  for line in infilehandle_elements:
+    splitline = line.strip().split()
+    if(len(splitline) == 7 and not "1" == splitline[-1]):
+      x, y, z, o1, o2, t, dt = splitline[0:7]
+      o1 = int(o1)-1
+      o2 = int(o2)-1
+      entry = HoppingElement(x, y, z, o1, o2, t)
+      if(entry.abst > elementcutoff):
+	input_elements.append(entry)
+  infilehandle_elements.close()
   
-  for i,l in enumerate(lines):
-    if(l.find("#x y z orbital1 orbital2 t") > -1):
-      break
-  lines = lines[i+1:] #take only lines with entries into account
-  
-  for l in lines:
-    splitline = l.strip().split()
-    x, y, z, o1, o2, t = splitline
-    e = HoppingElement(x, y, z, o1, o2, t)
-    input_elements.append(e)
-    
   return input_elements
   
-def group_elements_by_vector(input_elements):
-  #sort input elements by z, y, x
-  input_elements.sort(key=operator.attrgetter('z'))
-  input_elements.sort(key=operator.attrgetter('y'))
-  input_elements.sort(key=operator.attrgetter('x'))
+def add_equivalent_elements(elements):
+  #sort all elements by orbitals
+  elements.sort(key=operator.attrgetter('o2'))
+  elements.sort(key=operator.attrgetter('o1'))
+  #sort all elements by coordinate
+  elements.sort(key=operator.attrgetter('z'))
+  elements.sort(key=operator.attrgetter('y'))
+  elements.sort(key=operator.attrgetter('x'))
   
-  #make an array which stores information whether element is already grouped
-  Nelements = len(input_elements)
-  element_grouped = np.zeros(Nelements, dtype=int)
-  
-  #loop over elements and group them
-  threshold = 1e-3
-  grouped_elements = []
-  firstungroupedidx = 0
-  while(element_grouped.sum() < Nelements):
-    newgroup = []
-    #add first ungrouped element
-    newgroup.append(input_elements[firstungroupedidx])
-    element_grouped[firstungroupedidx] = 1
-    
-    #add elements to group by comparing hooping vectors
-    for i in range(firstungroupedidx+1,Nelements):
-      #check whether element is in group if it is currently ungrouped
-      if(0 == element_grouped[i]):
-	#check whether ungrouped element has the same hopping vector as first element in group
-	if(np.linalg.norm(newgroup[0].v - input_elements[i].v) < threshold):
-	  newgroup.append(input_elements[i])
-	  element_grouped[i] = 1
-	#assume that elements are ordered according to vectors so that we can stop searching once the first vector that does not match has been found
-	else:
-	  firstungroupedidx = i
-	  break
-    #append new group to list of groups
-    grouped_elements.append(newgroup)
-    
-  return grouped_elements
-  
-def get_unfolded_elements(grouped_elements):
-  np.set_printoptions(precision=2, linewidth=200)
-  #build space group unfolding matrix according to Milan Tomic
-  unfoldmatrix = np.identity(10)
-  unfoldmatrix[0:5,5:10] = np.identity(5)
-  unfoldmatrix[0,5] = -1.0 #assumes xz,yz orbitals with indices 0,1,5,6
-  unfoldmatrix[1,6] = -1.0
-  unfoldmatrix[5:10,0:5] = -unfoldmatrix[0:5,5:10].T
-  #print unfoldmatrix
-  
-  #build t_ij matrix in each group and unfold it
-  threshold = 1e-8
-  unfolded_elements = []
-  for group in grouped_elements:
-    tmat = np.zeros((10,10))
-    for e in group:
-      tmat[e.o1,e.o2] = e.t
-    #print tmat[0:5,0:5]
-    #print tmat[5:10,5:10]
-    #print 
-    #if(np.linalg.norm(group[0].v) < 1e-7):
-      #print tmat
-    tmat = unfoldmatrix.dot(tmat.dot(unfoldmatrix.T))
-    #if(np.linalg.norm(group[0].v) < 1e-7):
-      #print
-      #print tmat[0:5,0:5]
-      #print tmat[5:10,5:10]
-      #print
-      #print tmat
-      #print
-    
-    #take upper left block and save elements larger than threshold
-    for o1 in range(5):
-      for o2 in range(5):
-	t = tmat[o1,o2]
-	if(abs(t)>threshold):
-	  e = HoppingElement(group[0].x, group[0].y, group[0].z, o1, o2, t)
-	  unfolded_elements.append(e)
+  elements_new = []
+  #add all elements with equivalent hopping vectors and equal orbital indices
+  lastungroupedidx=0
+  nelements = len(elements)
+  groupedelements=0
+  while(groupedelements < nelements):
+    group = [elements[lastungroupedidx]]
+    groupedelements+=1
+    e1 = group[0]
+    for i in range(lastungroupedidx+1, nelements):
+      e = elements[i]
+      if((np.linalg.norm(e.v-e1.v) < 1e-7) and (e1.o1 == e.o1) and (e1.o2 == e.o2)):
+	group.append(e)
+	groupedelements+=1
+      else:
+	lastungroupedidx = i
+	break
+    #add all hopping elements in the group
+    summedt = sum([e.t for e in group])
+    enew = HoppingElement(e1.x, e1.y, e1.z, e1.o1, e1.o2, summedt)
+    elements_new.append(enew)
 
-  return unfolded_elements
+  return elements_new
   
 def write_output_file(outfilename, elements):
   outfilehandle = open(outfilename, 'w')
@@ -119,22 +114,19 @@ def write_output_file(outfilename, elements):
   outfilehandle.close()
     
 def main():
-  if(len(sys.argv) == 3):
-    infilename = sys.argv[1]
-    outfilename = sys.argv[2]
+  if(len(sys.argv) == 4):
+    hamilinfilename = sys.argv[1] #name of the Wannier90 Hamiltonian output case_hr.dat
+    outfilename = sys.argv[2] #name of the Hamiltonian output file name
+    elementcutoff = float(sys.argv[3]) #magnitude cutoff for hopping elements
     
-    #read input model
-    input_elements = get_input_elements(infilename)
+    #get input elements with cutoff applied from Wannier90 file
+    input_elements = get_input_elements(hamilinfilename, elementcutoff)
     print 'Input model successfully read.'
     
-    #group elements by real space hopping vector
-    print 'Started grouping hopping elements.'
-    grouped_elements = group_elements_by_vector(input_elements)
-    print 'Finished grouping hopping elements.'
-    
-    #unfold element matrix for each group
+    #unfold hopping elements
     print 'Started unfolding elements.'
-    unfolded_elements = get_unfolded_elements(grouped_elements)
+    unfolded_elements = get_unfolded_elements(input_elements)
+    unfolded_elements = add_equivalent_elements(unfolded_elements)
     print 'Finished unfolding elements.'
     
     #sort unfolded elements by magnitude
@@ -149,6 +141,6 @@ def main():
     print 'Program finished.'
     
   else:
-    print 'Wrong number of input parameters. Please supply input and output file names.'
+    print 'Wrong number of input arguments. Please supply Wannier90 case_hr.dat, WIEN2k case.outputd, an ouptut file name and the numerical magnitude cutoff for the hopping elements.'
   
 main()
