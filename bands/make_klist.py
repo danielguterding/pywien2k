@@ -11,10 +11,12 @@ def read_kpoints():
   print 'e.g. GAMMA 0 0 0'
   while not '' == s:
     s = raw_input('-->')
-    if not '' == s:
-      splitline = s.strip().split()
+    splitline = s.strip().split()
+    if (not '' == s) and (4 == len(splitline)):
       kpnames.append(splitline[0])
       kp.append(splitline[1:])
+    elif not '' == s:
+      print 'Invalid entry. Omitting.'
   print 'Finished reading k-points from command line.'
   return np.array(kp, dtype=float), kpnames
 
